@@ -1,0 +1,32 @@
+name: kvitto-payments
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: kvitto
+      POSTGRES_USER: kvitto
+      POSTGRES_PASSWORD: kvitto
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kvitto -d kvitto"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://kvitto:kvitto@db:5432/kvitto
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-local-demo-secret}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

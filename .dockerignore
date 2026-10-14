@@ -1,0 +1,13 @@
+.git/
+.venv/
+.uv-cache/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+*.db
+*.sqlite3
+tests/
+AI_LOG.md
+*.pdf
