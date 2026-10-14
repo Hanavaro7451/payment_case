@@ -30,31 +30,30 @@ Compose использует демонстрационные логин и па
 
 ## Примеры запросов
 
-Команды ниже рассчитаны на PowerShell. В `curl.exe` использован явный суффикс,
-чтобы не вызвать одноимённый псевдоним PowerShell.
+Команды ниже рассчитаны на Bash (Linux, macOS или WSL).
 
-```powershell
-curl.exe http://localhost:8000/tariffs
+```bash
+curl http://localhost:8000/tariffs
 
-curl.exe -X POST http://localhost:8000/payments `
-  -H "Content-Type: application/json" `
-  -H "Idempotency-Key: example-checkout-1" `
+curl -X POST http://localhost:8000/payments \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: example-checkout-1" \
   --data-raw '{"tariff_id":"standard","email":"student@example.com","method":"card","promo_code":"KVITTO10"}'
 
-curl.exe "http://localhost:8000/payments?email=student@example.com&status=pending"
+curl "http://localhost:8000/payments?email=student@example.com&status=pending"
 ```
 
 Для вебхука возьмите `id` созданного платежа вместо `1`. Подпись — HMAC-SHA256
 от **точных байтов** JSON в теле запроса; любое изменение пробелов после
 вычисления подписи сделает её неверной.
 
-```powershell
-$body = '{"payment_id":1,"status":"succeeded"}'
-$signature = python -c "import hashlib,hmac,sys; print(hmac.new(b'local-demo-secret', sys.argv[1].encode(), hashlib.sha256).hexdigest())" $body
-curl.exe -X POST http://localhost:8000/webhooks/bank `
-  -H "Content-Type: application/json" `
-  -H "X-Signature: $signature" `
-  --data-raw $body
+```bash
+body='{"payment_id":1,"status":"succeeded"}'
+signature=$(python3 -c 'import hashlib,hmac,sys; print(hmac.new(b"local-demo-secret", sys.argv[1].encode(), hashlib.sha256).hexdigest())' "$body")
+curl -X POST http://localhost:8000/webhooks/bank \
+  -H "Content-Type: application/json" \
+  -H "X-Signature: $signature" \
+  --data-raw "$body"
 ```
 
 Допустимые переходы: `pending → succeeded`, `pending → failed`,
@@ -70,19 +69,19 @@ curl.exe -X POST http://localhost:8000/webhooks/bank `
 запуском создайте такую БД либо задайте собственный URL. Для вебхука также
 задайте `WEBHOOK_SECRET`.
 
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-$env:DATABASE_URL = "postgresql+psycopg://kvitto:kvitto@localhost:5432/kvitto"
-$env:WEBHOOK_SECRET = "local-demo-secret"
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[dev]'
+export DATABASE_URL='postgresql+psycopg://kvitto:kvitto@localhost:5432/kvitto'
+export WEBHOOK_SECRET='local-demo-secret'
 alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
 Для запуска проверок:
 
-```powershell
+```bash
 ruff check .
 pytest -q
 alembic check
