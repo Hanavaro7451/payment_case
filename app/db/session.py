@@ -1,19 +1,11 @@
-"""Database connection and session lifecycle."""
-
 from collections.abc import Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
-from app.config import get_database_url
+from app.core.config import get_database_url
 
 DATABASE_URL = get_database_url()
-
-
-class Base(DeclarativeBase):
-    pass
-
-
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)

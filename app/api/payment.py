@@ -1,27 +1,17 @@
-"""HTTP transport for payment operations."""
-
 import hashlib
 import hmac
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
+from fastapi import APIRouter, Header, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-from sqlalchemy.orm import Session
 
-from app.config import get_webhook_secret
-from app.db import get_db
-from app.models import Payment, Tariff
-from app.schemas import (
-    BankWebhook,
-    PaymentCreate,
-    PaymentOut,
-    PaymentStatus,
-    TariffOut,
-    WebhookResult,
-)
-from app.services import (
+from app.api.dependencies import SessionDep
+from app.core.config import get_webhook_secret
+from app.domain.payment import PaymentStatus
+from app.models.payment import Payment
+from app.schemas.payment import BankWebhook, PaymentCreate, PaymentOut, WebhookResult
+from app.services.payment import (
     InvalidTransitionError,
     PaymentNotFoundError,
     PaymentService,
@@ -29,7 +19,6 @@ from app.services import (
 )
 
 router = APIRouter()
-SessionDep = Annotated[Session, Depends(get_db)]
 
 
 def validation_error(field: str, value: object, message: str) -> RequestValidationError:
@@ -51,11 +40,6 @@ def parse_webhook_body(raw_body: bytes) -> BankWebhook:
                 detail["input"] = detail["input"].decode("utf-8", errors="replace")
             errors.append(detail)
         raise RequestValidationError(errors) from exc
-
-
-@router.get("/tariffs", response_model=list[TariffOut])
-def list_tariffs(db: SessionDep) -> list[Tariff]:
-    return PaymentService(db).list_tariffs()
 
 
 @router.post("/payments", response_model=PaymentOut, status_code=201)

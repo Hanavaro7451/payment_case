@@ -1,22 +1,11 @@
-"""Payment rules independent from HTTP and SQL query details."""
-
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.models import Payment, Tariff
-from app.repositories import PaymentRepository, TariffRepository
-from app.schemas import PaymentCreate, PaymentStatus
-
-DEFAULT_TARIFFS = (
-    ("basic", "Basic", 990_000),
-    ("standard", "Standard", 1_990_000),
-    ("premium", "Premium", 2_990_000),
-)
-
-ALLOWED_TRANSITIONS = {
-    PaymentStatus.pending: {PaymentStatus.succeeded, PaymentStatus.failed},
-    PaymentStatus.succeeded: {PaymentStatus.refunded},
-}
+from app.domain.payment import ALLOWED_TRANSITIONS, PaymentStatus, installment_schedule
+from app.models.payment import Payment
+from app.repositories.payment import PaymentRepository
+from app.repositories.tariff import TariffRepository
+from app.schemas.payment import PaymentCreate
 
 
 class UnknownTariffError(Exception):
@@ -31,20 +20,11 @@ class InvalidTransitionError(Exception):
     pass
 
 
-def installment_schedule(amount: int, months: int) -> list[int]:
-    """Put remainder kopecks into the earliest installments."""
-    common, remainder = divmod(amount, months)
-    return [common + (index < remainder) for index in range(months)]
-
-
 class PaymentService:
     def __init__(self, db: Session) -> None:
         self.db = db
         self.payments = PaymentRepository(db)
         self.tariffs = TariffRepository(db)
-
-    def list_tariffs(self) -> list[Tariff]:
-        return self.tariffs.list_all()
 
     def list_payments(self, email: str | None, status: PaymentStatus | None) -> list[Payment]:
         return self.payments.list_filtered(email, status)

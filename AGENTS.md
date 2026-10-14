@@ -3,9 +3,9 @@
 - When helping the project owner learn, give hints and explain tradeoffs before
   offering a full implementation unless the owner explicitly requests one.
   In code review, start with what works, then prioritize actionable findings.
-- Keep the current layers: `app/api.py` for HTTP, `app/schemas.py` for input/output,
-  `app/services.py` for payment rules, `app/repositories.py` for database queries,
-  and `app/models.py` for persisted entities. Do not move business rules into routes.
+- Keep the layer directories `app/api/`, `app/schemas/`, `app/services/`,
+  `app/repositories/`, and `app/models/`. Keep tariff and payment code in their
+  separate modules in each layer. Do not move business rules into routes.
 - Store money as integer kopecks. Preserve the status transition table, HMAC check
   over the raw webhook body, and atomic idempotency behavior.
 - Change the database schema through Alembic migrations. Do not call `create_all()`

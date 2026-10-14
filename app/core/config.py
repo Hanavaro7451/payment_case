@@ -1,5 +1,3 @@
-"""Environment-backed application settings."""
-
 import os
 
 DEFAULT_DATABASE_URL = "postgresql+psycopg://kvitto:kvitto@localhost:5432/kvitto"

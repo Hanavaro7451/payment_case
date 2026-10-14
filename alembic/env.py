@@ -1,14 +1,14 @@
-"""Alembic connection to the same database as the API."""
-
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from app import models  # noqa: F401 - registers tables in Base.metadata
-from app.db import DATABASE_URL, Base
+from app.core.config import get_database_url
+from app.db.base import Base
 
 config = context.config
+DATABASE_URL = get_database_url()
 config.set_main_option("sqlalchemy.url", DATABASE_URL.replace("%", "%%"))
 
 if config.config_file_name is not None:

@@ -1,5 +1,3 @@
-"""API behavior required by the Kvitto assignment and its bonuses."""
-
 import asyncio
 import hashlib
 import hmac
@@ -11,8 +9,8 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app import db as app_db
-from app.db import Base
+from app.db import session as app_db
+from app.db.base import Base
 from app.models import Payment  # noqa: F401 - register tables before create_all
 
 main_module = importlib.import_module("app.main")

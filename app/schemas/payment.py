@@ -1,31 +1,9 @@
-"""API input and output shapes."""
-
 from datetime import datetime
-from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
-
-class PaymentMethod(StrEnum):
-    card = "card"
-    sbp = "sbp"
-    installment = "installment"
-
-
-class PaymentStatus(StrEnum):
-    pending = "pending"
-    succeeded = "succeeded"
-    failed = "failed"
-    refunded = "refunded"
-
-
-class TariffOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: str
-    title: str
-    price: int
+from app.domain.payment import PaymentMethod, PaymentStatus
 
 
 class PaymentCreate(BaseModel):

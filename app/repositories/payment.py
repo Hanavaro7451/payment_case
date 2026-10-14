@@ -1,26 +1,8 @@
-"""SQLAlchemy queries used by the payment service."""
-
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from app.models import Payment, Tariff
-from app.schemas import PaymentStatus
-
-
-class TariffRepository:
-    def __init__(self, db: Session) -> None:
-        self.db = db
-
-    def list_all(self) -> list[Tariff]:
-        return list(self.db.scalars(select(Tariff).order_by(Tariff.price)))
-
-    def get(self, tariff_id: str) -> Tariff | None:
-        return self.db.get(Tariff, tariff_id)
-
-    def seed_missing(self, defaults: tuple[tuple[str, str, int], ...]) -> None:
-        for tariff_id, title, price in defaults:
-            if self.get(tariff_id) is None:
-                self.db.add(Tariff(id=tariff_id, title=title, price=price))
+from app.domain.payment import PaymentStatus
+from app.models.payment import Payment
 
 
 class PaymentRepository:
